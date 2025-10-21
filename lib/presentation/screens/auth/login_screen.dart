@@ -28,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // ✅ PROVIDER: Lấy AuthProvider để gọi login API
     final authProvider = context.read<AuthProvider>();
     
     try {
@@ -46,6 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
             content: Text(e.toString()),
             backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
     final authProvider = context.read<AuthProvider>();
     
     try {
@@ -82,18 +90,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // Logo
                 Center(
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.pets,
-                      size: 60,
-                      color: AppColors.primary,
-                    ),
+                  child: Image.asset(
+                    'assets/icons/Logobig.png',
+                    width: 150,
+                    height: 150,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 
@@ -187,12 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 const SizedBox(height: 8),
                 
-                // Forgot Password
+                // Forgot Password Link
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Navigate to forgot password
+                      context.go('/forgot-password');
                     },
                     child: const Text(AppStrings.forgotPassword),
                   ),
@@ -226,9 +227,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 const SizedBox(height: 24),
                 
-                // TODO: Google Login (requires Firebase setup)
-                // Uncomment when Firebase is configured
-                /*
                 // Divider
                 Row(
                   children: [
@@ -262,7 +260,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 
                 const SizedBox(height: 24),
-                */
                 
                 // Register Link
                 Row(

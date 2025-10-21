@@ -1,9 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../data/models/user.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/services/storage_service.dart';
 import '../data/services/auth_service.dart';
-import 'dart:convert';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -227,6 +228,33 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Upload Avatar
+  Future<void> uploadAvatar(File imageFile) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Upload image to backend
+      await _authRepository.uploadAvatar(imageFile);
+      
+      // Reload user data from backend to get updated avatar
+      final updatedUser = await _authRepository.getCurrentUser();
+      _user = updatedUser;
+      
+      // Update stored user data
+      await _storageService.saveUserData(jsonEncode(_user!.toJson()));
+      
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Change Password
   Future<void> changePassword({
     required String oldPassword,
@@ -244,6 +272,56 @@ class AuthProvider extends ChangeNotifier {
         confirmNewPassword: confirmNewPassword,
       );
       
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Forgot Password
+  Future<void> forgotPassword({
+    required String email,
+    required String phoneNumber,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.forgotPassword(
+        email: email,
+        phoneNumber: phoneNumber,
+      );
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Reset Password
+  Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.resetPassword(
+        email: email,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      );
       _error = null;
     } catch (e) {
       _error = e.toString();

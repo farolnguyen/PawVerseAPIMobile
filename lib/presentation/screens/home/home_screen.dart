@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../config/app_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/strings.dart';
 import '../../../providers/product_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../providers/wishlist_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../widgets/product_card.dart';
+import '../../widgets/filter_sort_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,12 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
     productProvider.loadCategories();
     productProvider.loadBrands();
     context.read<CartProvider>().loadCart();
+    context.read<WishlistProvider>().loadWishlist();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      context.read<ProductProvider>().loadProducts();
+      // Schedule load in next frame to avoid "Build scheduled during frame" error
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<ProductProvider>().loadProducts();
+        }
+      });
     }
   }
 
@@ -60,17 +69,30 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
 
-          // Cart Button with Badge
-          Consumer<CartProvider>(
-            builder: (context, cartProvider, child) {
-              final itemCount = cartProvider.itemCount;
+          // Filter Button
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const FilterSortBottomSheet(),
+              );
+            },
+          ),
+
+          // Wishlist Button with Badge
+          Consumer<WishlistProvider>(
+            builder: (context, wishlistProvider, child) {
+              final itemCount = wishlistProvider.itemCount;
 
               return Stack(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.shopping_cart_outlined),
+                    icon: const Icon(Icons.favorite_border),
                     onPressed: () {
-                      context.push('/cart');
+                      context.push('/wishlist');
                     },
                   ),
                   if (itemCount > 0)
@@ -124,14 +146,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         CircleAvatar(
+                          key: ValueKey(user?.avatar ?? 'no-avatar'),
                           backgroundColor: AppColors.primary,
-                          child: Text(
-                            user?.initials ?? '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
+                              ? NetworkImage(
+                                  '${AppConfig.getImageUrl(user.avatar!)}?t=${DateTime.now().millisecondsSinceEpoch}',
+                                )
+                              : null,
+                          child: user?.avatar == null || user!.avatar!.isEmpty
+                              ? Text(
+                                  user?.initials ?? '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -155,12 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.person),
-                          onPressed: () {
-                            context.push('/profile');
-                          },
-                        ),
                       ],
                     ),
                   );
@@ -179,18 +203,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          'Danh mục',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Danh mục',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.push('/categories');
+                              },
+                              child: const Text('Xem tất cả'),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(
-                        height: 100,
+                        height: 110,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -210,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 },
                                 child: Container(
-                                  width: 80,
+                                  width: 95,
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: isSelected
@@ -226,20 +261,50 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
-                                        Icons.category,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppColors.primary,
+                                      // Category Image/Icon
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Colors.white.withOpacity(0.2)
+                                              : AppColors.primary.withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: category.hinhAnh != null
+                                            ? ClipOval(
+                                                child: Image.network(
+                                                  AppConfig.getImageUrl(category.hinhAnh),
+                                                  width: 48,
+                                                  height: 48,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return Icon(
+                                                      Icons.category,
+                                                      size: 24,
+                                                      color: isSelected
+                                                          ? Colors.white
+                                                          : AppColors.primary,
+                                                    );
+                                                  },
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.category,
+                                                size: 24,
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : AppColors.primary,
+                                              ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 2),
                                       Text(
                                         category.tenDanhMuc,
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 11,
                                           color: isSelected
                                               ? Colors.white
                                               : AppColors.textPrimary,

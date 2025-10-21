@@ -4,6 +4,7 @@ class AppConfig {
   // For iOS Simulator: use localhost
   // For Real Device: use your computer's IP address
   static const String apiBaseUrl = 'https://10.0.2.2:7038/api';
+  static const String imageBaseUrl = 'https://10.0.2.2:7038';
   
   // API Endpoints
   static const String authEndpoint = '/auth';
@@ -33,4 +34,35 @@ class AppConfig {
   static const String userKey = 'user_data';
   static const String themeKey = 'theme_mode';
   static const String languageKey = 'language';
+  
+  // Helper methods
+  /// Get full image URL from relative path
+  /// Example: getImageUrl('products/product1.jpg') or getImageUrl('/images/categories/cat1.png')
+  static String getImageUrl(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) {
+      return '';
+    }
+    
+    // If already a full URL, return as is
+    if (relativePath.startsWith('http')) {
+      return relativePath;
+    }
+    
+    // Remove leading slash if exists
+    final cleanPath = relativePath.startsWith('/') 
+        ? relativePath.substring(1) 
+        : relativePath;
+    
+    // If path already includes 'Images/' or 'images/' (case insensitive), use as is
+    // This handles both backend static files and database paths
+    if (cleanPath.toLowerCase().startsWith('images/')) {
+      // Path already has 'images/' prefix, use directly
+      return '$imageBaseUrl/$cleanPath';
+    }
+    
+    // Otherwise, prepend 'Images/' for backend static files
+    final fullPath = 'Images/$cleanPath';
+    
+    return '$imageBaseUrl/$fullPath';
+  }
 }

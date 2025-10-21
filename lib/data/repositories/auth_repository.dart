@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
 import '../../config/app_config.dart';
@@ -48,8 +50,9 @@ class AuthRepository {
   // Login with Google
   Future<LoginResponse> loginWithGoogle(String idToken) async {
     final response = await _api.post(
-      '${AppConfig.authEndpoint}/google-login',
+      '${AppConfig.authEndpoint}/external-login',
       data: {
+        'provider': 'Google',
         'idToken': idToken,
       },
     );
@@ -89,6 +92,26 @@ class AuthRepository {
     return User.fromJson(data);
   }
 
+  // Upload Avatar
+  Future<String> uploadAvatar(File imageFile) async {
+    // Create form data with file
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        imageFile.path,
+        filename: imageFile.path.split('/').last,
+      ),
+    });
+
+    // Use ApiService (which automatically adds auth token)
+    final response = await _api.post(
+      '${AppConfig.authEndpoint}/profile/upload-avatar',
+      data: formData,
+    );
+
+    // Return avatar path from response
+    return response.data['data']; // Returns: "profiles/userId_timestamp.jpg"
+  }
+
   // Change Password
   Future<void> changePassword({
     required String oldPassword,
@@ -115,5 +138,35 @@ class AuthRepository {
     );
 
     return response.data['data']['token'];
+  }
+
+  // Forgot Password - Verify user
+  Future<void> forgotPassword({
+    required String email,
+    required String phoneNumber,
+  }) async {
+    await _api.post(
+      '${AppConfig.authEndpoint}/forgot-password',
+      data: {
+        'email': email,
+        'phoneNumber': phoneNumber,
+      },
+    );
+  }
+
+  // Reset Password
+  Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _api.post(
+      '${AppConfig.authEndpoint}/reset-password',
+      data: {
+        'email': email,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+    );
   }
 }

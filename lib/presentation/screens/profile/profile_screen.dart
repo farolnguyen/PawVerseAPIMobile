@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../config/app_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/strings.dart';
 import '../../../providers/auth_provider.dart';
@@ -31,6 +32,7 @@ class ProfileScreen extends StatelessWidget {
                 // Avatar
                 Center(
                   child: Container(
+                    key: ValueKey(user.avatar ?? 'no-avatar'), // Force rebuild when avatar changes
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
@@ -38,10 +40,10 @@ class ProfileScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: Center(
-                      child: user.hinhAnh != null && user.hinhAnh!.isNotEmpty
+                      child: user.avatar != null && user.avatar!.isNotEmpty
                           ? ClipOval(
                               child: Image.network(
-                                user.hinhAnh!,
+                                '${AppConfig.getImageUrl(user.avatar!)}?t=${DateTime.now().millisecondsSinceEpoch}',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
@@ -144,12 +146,7 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text(AppStrings.editProfile),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Navigate to edit profile
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Chức năng đang phát triển'),
-                            ),
-                          );
+                          context.push('/profile/edit');
                         },
                       ),
                       const Divider(height: 1),
@@ -158,12 +155,7 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text(AppStrings.changePassword),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Navigate to change password
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Chức năng đang phát triển'),
-                            ),
-                          );
+                          context.push('/profile/change-password');
                         },
                       ),
                       const Divider(height: 1),
@@ -172,12 +164,7 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text(AppStrings.myOrders),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Navigate to orders
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Chức năng đang phát triển'),
-                            ),
-                          );
+                          context.push('/orders');
                         },
                       ),
                     ],

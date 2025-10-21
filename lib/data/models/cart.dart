@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../config/app_config.dart';
 
 part 'cart.g.dart';
 
@@ -74,4 +75,5 @@ class CartItem {
 
   bool get canIncrease => soLuong < soLuongTonKho;
   bool get canDecrease => soLuong > 1;
+  String get imageUrl => AppConfig.getImageUrl(hinhAnh);
 }

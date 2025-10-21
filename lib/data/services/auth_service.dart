@@ -24,15 +24,15 @@ class AuthService {
       // 2. Get Google authentication
       final GoogleSignInAuthentication auth = await account.authentication;
       
-      // 3. Get ID Token
-      final String? idToken = auth.idToken;
+      // 3. Get Access Token (works better on Android)
+      final String? accessToken = auth.accessToken;
       
-      if (idToken == null) {
-        throw Exception('Không thể lấy Google ID Token');
+      if (accessToken == null) {
+        throw Exception('Không thể lấy Google Access Token');
       }
 
-      // 4. Send ID Token to backend
-      final response = await _authRepository.loginWithGoogle(idToken);
+      // 4. Send Access Token to backend
+      final response = await _authRepository.loginWithGoogle(accessToken);
       
       return response;
     } catch (e) {

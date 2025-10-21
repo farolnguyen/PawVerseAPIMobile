@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../config/app_config.dart';
 
 part 'product.g.dart';
 
@@ -70,7 +71,7 @@ class Product {
     return null;
   }
   
-  String get imageUrl => hinhAnh ?? '';
+  String get imageUrl => AppConfig.getImageUrl(hinhAnh);
 }
 
 @JsonSerializable()

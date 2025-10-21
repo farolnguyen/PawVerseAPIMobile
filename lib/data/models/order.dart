@@ -14,9 +14,9 @@ class Order {
   final DateTime? ngayGiaoHangDuKien;
   final DateTime? ngayGiaoHang;
   final DateTime? ngayHuy;
-  final double tongTienSanPham;
+  final double? tongTienSanPham;
   final double phiVanChuyen;
-  final double giamGia;
+  final double? giamGia;
   final double tongTien;
   final String? ghiChu;
   final List<OrderItem>? items;
@@ -33,9 +33,9 @@ class Order {
     this.ngayGiaoHangDuKien,
     this.ngayGiaoHang,
     this.ngayHuy,
-    required this.tongTienSanPham,
+    this.tongTienSanPham,
     required this.phiVanChuyen,
-    required this.giamGia,
+    this.giamGia,
     required this.tongTien,
     this.ghiChu,
     this.items,
@@ -48,8 +48,8 @@ class Order {
   // Order status helpers
   bool get isPending => trangThai == "Chờ xác nhận";
   bool get isConfirmed => trangThai == "Đã xác nhận";
-  bool get isShipping => trangThai == "Đang giao hàng";
-  bool get isDelivered => trangThai == "Đã giao hàng";
+  bool get isShipping => trangThai == "Đang giao hàng" || trangThai == "Đang giao";
+  bool get isDelivered => trangThai == "Đã giao hàng" || trangThai == "Đã giao";
   bool get isCancelled => trangThai == "Đã hủy";
   
   bool get canCancel => isPending;
@@ -61,8 +61,10 @@ class Order {
       case "Đã xác nhận":
         return "info";
       case "Đang giao hàng":
+      case "Đang giao":
         return "primary";
       case "Đã giao hàng":
+      case "Đã giao":
         return "success";
       case "Đã hủy":
         return "error";

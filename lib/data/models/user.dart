@@ -11,7 +11,10 @@ class User {
   final String? diaChi;
   final String? gioiTinh;
   final DateTime? ngaySinh;
+  
+  @JsonKey(name: 'avatar')  // Backend uses 'avatar', mobile uses 'hinhAnh'
   final String? hinhAnh;
+  
   final List<String>? roles;
 
   User({
@@ -33,6 +36,9 @@ class User {
   bool get isAdmin => roles?.contains('Admin') ?? false;
   
   String get displayName => fullName ?? email;
+  
+  // Alias for hinhAnh (used for avatar)
+  String? get avatar => hinhAnh;
   
   String get initials {
     if (fullName != null && fullName!.isNotEmpty) {

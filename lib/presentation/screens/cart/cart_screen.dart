@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/strings.dart';
@@ -187,7 +188,7 @@ class _CartScreenState extends State<CartScreen> {
                                 child: item.hinhAnh != null &&
                                         item.hinhAnh!.isNotEmpty
                                     ? Image.network(
-                                        item.hinhAnh!,
+                                        item.imageUrl,
                                         fit: BoxFit.cover,
                                         errorBuilder: (context, error, stackTrace) {
                                           return const Icon(
@@ -359,12 +360,7 @@ class _CartScreenState extends State<CartScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // TODO: Navigate to checkout
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Chức năng thanh toán đang phát triển'),
-                            ),
-                          );
+                          context.push('/checkout');
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),

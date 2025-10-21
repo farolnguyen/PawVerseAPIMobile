@@ -23,9 +23,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order(
   ngayHuy: json['ngayHuy'] == null
       ? null
       : DateTime.parse(json['ngayHuy'] as String),
-  tongTienSanPham: (json['tongTienSanPham'] as num).toDouble(),
+  tongTienSanPham: (json['tongTienSanPham'] as num?)?.toDouble(),
   phiVanChuyen: (json['phiVanChuyen'] as num).toDouble(),
-  giamGia: (json['giamGia'] as num).toDouble(),
+  giamGia: (json['giamGia'] as num?)?.toDouble(),
   tongTien: (json['tongTien'] as num).toDouble(),
   ghiChu: json['ghiChu'] as String?,
   items: (json['items'] as List<dynamic>?)
