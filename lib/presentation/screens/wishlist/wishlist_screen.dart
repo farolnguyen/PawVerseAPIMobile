@@ -6,6 +6,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/strings.dart';
 import '../../../providers/wishlist_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../../widgets/empty_state_widget.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -96,37 +97,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
           }
 
           if (wishlistProvider.items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.favorite_border,
-                    size: 100,
-                    color: AppColors.textSecondary.withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Danh sách yêu thích trống',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Thêm sản phẩm yêu thích để xem sau',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Khám phá sản phẩm'),
-                  ),
-                ],
-              ),
+            return EmptyStateWidget(
+              icon: Icons.favorite_border,
+              title: 'Chưa có sản phẩm yêu thích',
+              message: 'Hãy thêm sản phẩm vào danh sách yêu thích',
+              buttonText: 'Khám phá sản phẩm',
+              onButtonPressed: () => Navigator.of(context).pop(),
             );
           }
 

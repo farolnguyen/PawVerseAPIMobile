@@ -10,6 +10,7 @@ import '../../../providers/wishlist_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/filter_sort_bottom_sheet.dart';
+import '../../widgets/badge_icon.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -85,42 +86,11 @@ class _HomeScreenState extends State<HomeScreen> {
           // Wishlist Button with Badge
           Consumer<WishlistProvider>(
             builder: (context, wishlistProvider, child) {
-              final itemCount = wishlistProvider.itemCount;
-
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.favorite_border),
-                    onPressed: () {
-                      context.push('/wishlist');
-                    },
-                  ),
-                  if (itemCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.error,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          itemCount > 99 ? '99+' : itemCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
+              return BadgeIcon(
+                icon: Icons.favorite_border,
+                count: wishlistProvider.itemCount,
+                onPressed: () => context.push('/wishlist'),
+                tooltip: 'Danh sách yêu thích',
               );
             },
           ),

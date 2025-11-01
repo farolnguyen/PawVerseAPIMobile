@@ -37,7 +37,6 @@ class AppConfig {
   
   // Helper methods
   /// Get full image URL from relative path
-  /// Example: getImageUrl('products/product1.jpg') or getImageUrl('/images/categories/cat1.png')
   static String getImageUrl(String? relativePath) {
     if (relativePath == null || relativePath.isEmpty) {
       return '';

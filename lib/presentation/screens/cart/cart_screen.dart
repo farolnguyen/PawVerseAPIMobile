@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/strings.dart';
 import '../../../providers/cart_provider.dart';
+import '../../widgets/empty_state_widget.dart';
+import '../../widgets/cart_item_card.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -91,37 +93,12 @@ class _CartScreenState extends State<CartScreen> {
           }
 
           if (cartProvider.cart.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 100,
-                    color: AppColors.textSecondary.withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    AppStrings.emptyCart,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    AppStrings.emptyCartMessage,
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Tiếp tục mua sắm'),
-                  ),
-                ],
-              ),
+            return EmptyStateWidget(
+              icon: Icons.shopping_cart_outlined,
+              title: AppStrings.emptyCart,
+              message: AppStrings.emptyCartMessage,
+              buttonText: 'Tiếp tục mua sắm',
+              onButtonPressed: () => Navigator.of(context).pop(),
             );
           }
 
@@ -134,19 +111,11 @@ class _CartScreenState extends State<CartScreen> {
                   itemBuilder: (context, index) {
                     final item = cartProvider.cart.items[index];
 
-                    return Dismissible(
-                      key: Key(item.id.toString()),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        color: AppColors.error,
-                        child: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
-                      ),
-                      onDismissed: (direction) async {
+                    return CartItemCard(
+                      item: item,
+                      dismissible: true,
+                      showQuantitySelector: true,
+                      onRemove: () async {
                         try {
                           await cartProvider.removeItem(item.id);
                           if (context.mounted) {
@@ -168,153 +137,20 @@ class _CartScreenState extends State<CartScreen> {
                           }
                         }
                       },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              // Product Image
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: AppColors.background,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: item.hinhAnh != null &&
-                                        item.hinhAnh!.isNotEmpty
-                                    ? Image.network(
-                                        item.imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return const Icon(
-                                            Icons.pets,
-                                            color: AppColors.textSecondary,
-                                          );
-                                        },
-                                      )
-                                    : const Icon(
-                                        Icons.pets,
-                                        color: AppColors.textSecondary,
-                                      ),
+                      onQuantityChanged: (quantity) async {
+                        try {
+                          await cartProvider.updateQuantity(item.id, quantity);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: AppColors.error,
                               ),
-
-                              const SizedBox(width: 12),
-
-                              // Product Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.tenSanPham,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      currencyFormat.format(item.giaHienThi),
-                                      style: const TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    if (!item.conHang)
-                                      const Text(
-                                        'Hết hàng',
-                                        style: TextStyle(
-                                          color: AppColors.error,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-
-                              // Quantity Controls
-                              Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        onPressed: item.canDecrease
-                                            ? () async {
-                                                try {
-                                                  await cartProvider.updateQuantity(
-                                                    item.id,
-                                                    item.soLuong - 1,
-                                                  );
-                                                } catch (e) {
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(context)
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(e.toString()),
-                                                        backgroundColor:
-                                                            AppColors.error,
-                                                      ),
-                                                    );
-                                                  }
-                                                }
-                                              }
-                                            : null,
-                                        icon: const Icon(Icons.remove_circle_outline),
-                                        iconSize: 24,
-                                      ),
-                                      Text(
-                                        item.soLuong.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: item.canIncrease
-                                            ? () async {
-                                                try {
-                                                  await cartProvider.updateQuantity(
-                                                    item.id,
-                                                    item.soLuong + 1,
-                                                  );
-                                                } catch (e) {
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(context)
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(e.toString()),
-                                                        backgroundColor:
-                                                            AppColors.error,
-                                                      ),
-                                                    );
-                                                  }
-                                                }
-                                              }
-                                            : null,
-                                        icon: const Icon(Icons.add_circle_outline),
-                                        iconSize: 24,
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    currencyFormat.format(item.thanhTien),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                            );
+                          }
+                        }
+                      },
                     );
                   },
                 ),

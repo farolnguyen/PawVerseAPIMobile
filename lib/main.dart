@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
     final orderRepository = OrderRepository(apiService);
     final chatbotRepository = ChatbotRepository(http.Client());
 
-    // ✅ PROVIDER: MultiProvider wrap toàn app để cung cấp state cho tất cả screens
+    //  PROVIDER: MultiProvider wrap toàn app để cung cấp state cho tất cả screens
     return MultiProvider(
       providers: [
         // Auth Provider
